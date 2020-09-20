@@ -16,6 +16,13 @@ type MiniGame struct {
 	AppSecret string `json:"app_secret"`
 }
 
+func NewMiniGame(appId, appSecret string) *MiniGame {
+	return &MiniGame{
+		AppId:     appId,
+		AppSecret: appSecret,
+	}
+}
+
 // GET https://api.weixin.qq.com/sns/jscode2session?appid=APPID&secret=SECRET&js_code=JSCODE&grant_type=authorization_code
 func (m *MiniGame) JsCode2Session(code string) (r *model.JsCode2SessionResponse, err error) {
 
