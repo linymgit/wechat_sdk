@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/linymgit/wechat_sdk/model"
+	"github.com/valyala/fasthttp"
 	"io/ioutil"
 	"net/http"
 	"sync"
@@ -76,25 +77,22 @@ func (m *MiniGame) JsCode2Session(code string) (r *model.JsCode2SessionResponse,
 
 	url := fmt.Sprintf("https://api.weixin.qq.com/sns/jscode2session?appid=%s&secret=%s&js_code=%s&grant_type=authorization_code",
 		m.AppId, m.AppSecret, code)
-	resp, err := http.Get(url)
+	status, resp, err := fasthttp.Get(nil, url)
 	if err != nil {
+		err = errors.New(err.Error())
 		return
 	}
-	if resp.StatusCode != http.StatusOK {
-		err = errors.New(resp.Status)
+	if status != fasthttp.StatusOK {
+		err = errors.New(string(status))
 		return
 	}
-	bytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return
-	}
-	err = json.Unmarshal(bytes, &r)
+	err = json.Unmarshal(resp, &r)
 	if err != nil {
 		return
 	}
 	if r.Openid == "" {
 		w := model.WeChatSdkError{}
-		err = json.Unmarshal(bytes, &w)
+		err = json.Unmarshal(resp, &w)
 		if err != nil {
 			return
 		}
